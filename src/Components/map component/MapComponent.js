@@ -97,7 +97,7 @@ const MapComponent = (props) => {
     // Event listener for clicking on the map to add pinpoint
     map.on("click", (event) => {
       const clickedCoordinate = event.coordinate;
-      const lonLat = fromLonLat(clickedCoordinate);
+
       const pinpointFeature = new Feature({
         geometry: new Point(clickedCoordinate),
       });
