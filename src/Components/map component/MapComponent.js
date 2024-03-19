@@ -12,7 +12,6 @@ import { Vector as VectorSource } from "ol/source";
 import { Vector as VectorLayer } from "ol/layer";
 import { Fill, Stroke, Style, Circle as CircleStyle } from "ol/style";
 import { Draw } from "ol/interaction";
-import { fromLonLat } from "ol/proj";
 
 const MapComponent = (props) => {
   // Refs to hold functions for drawing interactions
