@@ -1,0 +1,29 @@
+.header {
+  box-sizing: border-box;
+  background-color: #213343;
+  height: 5rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  position: absolute;
+  width: 100%;
+  top: 0;
+  left: 0;
+}
+.heading {
+  font-size: 3rem;
+  font-family: "Times New Roman", Times, serif;
+  font-weight: 700;
+  padding: 0 0 0 1rem;
+  color: white;
+}
+.links {
+  display: flex;
+  flex-direction: row;
+  padding: 0 2rem;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  color: #fff;
+}
