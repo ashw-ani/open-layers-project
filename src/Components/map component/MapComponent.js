@@ -15,11 +15,13 @@ import { Draw } from "ol/interaction";
 import { fromLonLat } from "ol/proj";
 
 const MapComponent = (props) => {
+  // Refs to hold functions for drawing interactions
   const drawPointRef = useRef();
   const drawLineStringRef = useRef();
   const drawPolygonRef = useRef();
 
   useEffect(() => {
+    // Initialize OpenLayers map and layers
     const osmLayer = new TileLayer({
       preload: Infinity,
       source: new OSM(),
@@ -76,7 +78,7 @@ const MapComponent = (props) => {
     });
 
     const map = new Map({
-      target: "map",
+      target: "map", // Target element to render the map
       layers: [
         osmLayer,
         locationLayer,
@@ -85,66 +87,72 @@ const MapComponent = (props) => {
         DrawingLayer,
       ],
       view: new View({
-        center: [0, 0],
-        zoom: 8,
-        maxZoom: 15,
-        minZoom: 8,
+        center: [0, 0], // Initial center of the map
+        zoom: 8, // Initial zoom level
+        maxZoom: 15, // Maximum zoom level
+        minZoom: 8, // Minimum zoom level
       }),
     });
 
+    // Event listener for clicking on the map to add pinpoint
     map.on("click", (event) => {
       const clickedCoordinate = event.coordinate;
       const lonLat = fromLonLat(clickedCoordinate);
       const pinpointFeature = new Feature({
         geometry: new Point(clickedCoordinate),
       });
-      pinpointSource.clear();
-      pinpointSource.addFeature(pinpointFeature);
+      pinpointSource.clear(); // Clear existing pinpoints
+      pinpointSource.addFeature(pinpointFeature); // Add new pinpoint
     });
 
     let drawInteraction;
 
+    // Function to add drawing interactions based on the type (Point, LineString, Polygon)
     const addDrawInteractions = (type) => {
       drawInteraction = new Draw({
         source: drawingSource,
         type: type,
       });
 
+      // Event listener for when drawing ends
       drawInteraction.on("drawend", (event) => {
         const geometry = event.feature.getGeometry();
 
         if (type === "LineString") {
-          const length = geometry.getLength();
-          alert(`length of Line: ${Math.trunc(length)} meters`);
+          const length = geometry.getLength(); // Calculate length of LineString
+          alert(`Length of Line: ${Math.trunc(length)} meters`); // Display length
           console.log("Length of line:", length);
         } else if (type === "Polygon") {
-          const area = geometry.getArea();
-          alert(`Area of polygon: ${Math.trunc(area)} meter squares`);
-          console.log("area of polygon :", area);
+          const area = geometry.getArea(); // Calculate area of Polygon
+          alert(`Area of Polygon: ${Math.trunc(area)} square meters`); // Display area
+          console.log("Area of Polygon:", area);
         }
 
-        map.getViewport().style.cursor = "default";
+        map.getViewport().style.cursor = "default"; // Reset cursor
       });
 
-      map.addInteraction(drawInteraction);
+      map.addInteraction(drawInteraction); // Add draw interaction to the map
     };
 
+    // Function to remove drawing interactions
     const removeDrawInteractions = () => {
       if (drawInteraction) {
         map.removeInteraction(drawInteraction);
       }
     };
 
+    // Function to handle draw button clicks
     const handleDrawClick = (type) => {
-      removeDrawInteractions();
-      addDrawInteractions(type);
+      removeDrawInteractions(); // Remove existing draw interactions
+      addDrawInteractions(type); // Add draw interaction based on the selected type
     };
 
-    // Assign functions to refs
+    // Assign functions to refs for draw buttons
     drawPointRef.current = () => handleDrawClick("Point");
     drawLineStringRef.current = () => handleDrawClick("LineString");
     drawPolygonRef.current = () => handleDrawClick("Polygon");
 
+    // Geolocation setup to track user's position
     const geolocation = new Geolocation({
       trackingOptions: {
         enableHighAccuracy: true,
@@ -152,32 +160,37 @@ const MapComponent = (props) => {
       projection: map.getView().getProjection(),
     });
 
+    // Event listener for when geolocation position changes
     geolocation.on("change:position", () => {
       const coordinates = geolocation.getPosition();
       const accuracy = geolocation.getAccuracy();
 
+      // Add location point feature
       const locationPoint = new Feature({
         geometry: new Point(coordinates),
       });
-      locationLayer.getSource().clear();
-      locationLayer.getSource().addFeature(locationPoint);
+      locationLayer.getSource().clear(); // Clear existing location points
+      locationLayer.getSource().addFeature(locationPoint); // Add new location point
 
+      // Add accuracy circle feature
       const accuracyGeom = new Circle(coordinates, accuracy);
       const accuracyFeature = new Feature({
         geometry: accuracyGeom,
       });
-      accuracyLayer.getSource().clear();
-      accuracyLayer.getSource().addFeature(accuracyFeature);
+      accuracyLayer.getSource().clear(); // Clear existing accuracy circles
+      accuracyLayer.getSource().addFeature(accuracyFeature); // Add new accuracy circle
 
-      map.getView().fit(accuracyGeom, { padding: [20, 20, 20, 20] });
+      map.getView().fit(accuracyGeom, { padding: [20, 20, 20, 20] }); // Zoom to accuracy circle
     });
 
-    geolocation.setTracking(true);
+    geolocation.setTracking(true); // Start geolocation tracking
 
+    // Cleanup function to remove map when component unmounts
     return () => map.setTarget(null);
   }, []);
 
   return (
+    // Render map container and draw buttons
     <div className={styles.mapcomp} id="map">
       <div className={styles.map}></div>
       <div className={styles.buttons}>
